@@ -44,9 +44,9 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central_widget)
         
     def zoom_in(self):
-        print("Zooming in")
+        self.drop_area.rescale_elements_and_grid(1.1)
 
     def zoom_out(self):
-        print("Zooming out")
+        self.drop_area.rescale_elements_and_grid(0.9)
 
 

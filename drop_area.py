@@ -14,6 +14,7 @@ class DropArea(QWidget):
         self.setStyleSheet("border: 1px")
         self.quantum_circuit = quantum_circuit
         self.draggable_elements = {}
+        self.scale = 1.0
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasText():
@@ -31,7 +32,7 @@ class DropArea(QWidget):
         new_y = round(position.y() / grid_step) * grid_step
 
         is_from_left_panel = event.source().from_left_panel if event.source() else False
-  
+
         if is_from_left_panel:
             image_path = ELEMENT_IMAGES.get(element_type)  
             new_element_data = self.quantum_circuit.add_element(element_type, (new_x, new_y))
@@ -51,7 +52,12 @@ class DropArea(QWidget):
             else:
                 print(f"Element with ID {event.source().element_id} not found.")
             
- 
+    def rescale_elements_and_grid(self, scale_factor):
+        self.scale *= scale_factor
+        for element in self.draggable_elements.values():
+            element.rescale(self.scale)
+        self.repaint()  
+
     def paintEvent(self, event):
         super(DropArea, self).paintEvent(event)
         
@@ -64,16 +70,18 @@ class DropArea(QWidget):
         pen = QPen(Qt.gray, 0.5, Qt.DashLine)
         qp.setPen(pen)
 
-        grid_step = 20  
+        grid_step = 20 * self.scale  # Adjust the grid step according to the scale
 
         # Draw vertical lines
         x = 0
         while x < self.width():
-            qp.drawLine(x, 0, x, self.height())
+            qp.drawLine(int(x), 0, int(x), self.height())
             x += grid_step
 
         # Draw horizontal lines
         y = 0
         while y < self.height():
-            qp.drawLine(0, y, self.width(), y)
+            qp.drawLine(0, int(y), self.width(), int(y))
             y += grid_step
+            
+        
